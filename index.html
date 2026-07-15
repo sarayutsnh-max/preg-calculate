@@ -413,6 +413,13 @@
   <!-- Column 2: airline -->
   <div class="card">
     <h2><span class="num">2</span> เลือกสายการบิน</h2>
+    <div class="field">
+      <label for="pregType">ประเภทการตั้งครรภ์</label>
+      <select id="pregType">
+        <option value="single" selected>ครรภ์เดี่ยว (Singleton)</option>
+        <option value="twin">ครรภ์แฝด (Twin / Multiple)</option>
+      </select>
+    </div>
     <div class="field" style="margin-bottom:0;">
       <label for="airline">Airlines</label>
       <select id="airline"></select>
@@ -455,120 +462,40 @@
 
 <script>
 /* -------------------- Airline rule data --------------------
-   Extracted from clinic's "กำหนดอายุครรภ์แต่ละสายการบิน" reference sheet.
-   Each rule threshold given as {w, d} -> converted to total days = w*7+d
+   Updated reference: max gestational age (whole weeks) accepted for
+   singleton (ครรภ์เดี่ยว) vs twin/multiple (ครรภ์แฝด) pregnancies.
+   note = extra condition/asterisk detail from the source sheet.
 -------------------------------------------------------------- */
 function toDays(w,d){ return w*7+d; }
 
 const AIRLINES = {
-  "Thai Smile": {
-    allowedMax: toDays(28,0),
-    medMax: toDays(36,0),
-    notAllowedFrom: toDays(36,1)
-  },
-  "Thai Lion Air": {
-    allowedMax: toDays(28,6),
-    medMax: toDays(35,0),
-    notAllowedFrom: toDays(35,1)
-  },
-  "Nok Air": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(36,0),
-    notAllowedFrom: toDays(36,1)
-  },
-  "Air Asia": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(34,6),
-    notAllowedFrom: toDays(35,0)
-  },
-  "Batik Air": {
-    allowedMax: 0,
-    medMax: null, // no defined upper cap in source data - always needs medical certificate from day 1
-    notAllowedFrom: null,
-    note: "ต้องใช้ใบรับรองแพทย์ตั้งแต่ทราบว่าตั้งครรภ์ (ไม่มีข้อมูลอายุครรภ์สูงสุดที่ปฏิเสธ กรุณาตรวจสอบกับสายการบินโดยตรง)"
-  },
-  "Thai Airways": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(36,0),
-    notAllowedFrom: toDays(36,1)
-  },
-  "Bangkok Airways": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(36,0),
-    notAllowedFrom: toDays(36,1)
-  },
-  "Emirates": {
-    allowedMax: toDays(28,6),
-    medMax: toDays(36,6),
-    notAllowedFrom: toDays(37,0)
-  },
-  "Qatar Airways": {
-    allowedMax: toDays(28,6),
-    medMax: toDays(36,6),
-    notAllowedFrom: toDays(37,0)
-  },
-  "Etihad": {
-    allowedMax: toDays(28,6),
-    medMax: toDays(36,6),
-    notAllowedFrom: toDays(37,0)
-  },
-  "Malaysia Airlines": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(35,6),
-    notAllowedFrom: toDays(36,0)
-  },
-  "Lufthansa": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(35,6),
-    notAllowedFrom: toDays(36,0)
-  },
-  "Gulf Air": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(35,6),
-    notAllowedFrom: toDays(36,0)
-  },
-  "Kuwait Airways": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(35,6),
-    notAllowedFrom: toDays(36,0)
-  },
-  "SWISS": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(35,6),
-    notAllowedFrom: toDays(36,0)
-  },
-  "Austrian Airlines": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(35,6),
-    notAllowedFrom: toDays(36,0)
-  },
-  "Air Canada": {
-    allowedMax: toDays(35,6),
-    medMax: toDays(35,6),
-    notAllowedFrom: toDays(36,0),
-    note: "ส่วนใหญ่ไม่ต้องใช้ใบรับรองแพทย์ (Most cases do not require a medical certificate)"
-  },
-  "JAL": {
-    allowedMax: null,
-    medMax: null,
-    notAllowedFrom: null,
-    note: "ไม่มีข้อมูลอายุครรภ์ที่แน่นอนในระบบ กรุณาติดต่อสายการบินโดยตรง"
-  },
-  "Korean Air": {
-    allowedMax: toDays(31,6),
-    medMax: toDays(36,6),
-    notAllowedFrom: toDays(37,0)
-  },
-  "Thai VietJet": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(35,6),
-    notAllowedFrom: toDays(36,0)
-  },
-  "Thai AirAsia": {
-    allowedMax: toDays(27,6),
-    medMax: toDays(34,6),
-    notAllowedFrom: toDays(35,0)
-  }
+  "Thai Airways":         { single: 36, twin: 32, twinNote: "หรือเข้มงวดกว่าตามเส้นทางบิน" },
+  "Bangkok Airways":      { single: 36, twin: 32 },
+  "Thai AirAsia":         { single: 35, twin: 35, note: "*มีเงื่อนไขเพิ่มเติมสำหรับครรภ์แฝด กรุณาตรวจสอบกับสายการบินโดยตรง" },
+  "Thai AirAsia X":       { single: 35, twin: 35, note: "*มีเงื่อนไขเพิ่มเติมสำหรับครรภ์แฝด กรุณาตรวจสอบกับสายการบินโดยตรง" },
+  "Nok Air":              { single: 36, twin: 32 },
+  "Thai Lion Air":        { single: 35, twin: 32 },
+  "Thai Vietjet":         { single: 32, twin: 32 },
+  "Emirates":             { single: 36, twin: 32 },
+  "Qatar Airways":        { single: 36, twin: 32 },
+  "Singapore Airlines":   { single: 36, twin: 32 },
+  "Malaysia Airlines":    { single: 35, twin: 35 },
+  "Cathay Pacific":       { single: 36, twin: 32 },
+  "EVA Air":              { single: 36, twin: 32 },
+  "China Airlines":       { single: 36, twin: 32 },
+  "STARLUX Airlines":     { single: 32, twin: 32 },
+  "Japan Airlines (JAL)": { single: 36, twin: 32 },
+  "ANA":                  { single: 36, twin: 32 },
+  "Korean Air":           { single: 36, twin: 32 },
+  "Asiana Airlines":      { single: 36, twin: 32 },
+  "Vietnam Airlines":     { single: 36, twin: 32 },
+  "Cebu Pacific":         { single: 36, twin: 32 },
+  "Philippine Airlines":  { single: 36, twin: 32 },
+  "Scoot":                { single: 36, twin: 32 },
+  "AirAsia (Malaysia)":   { single: 35, twin: 35, note: "*มีเงื่อนไขเพิ่มเติมสำหรับครรภ์แฝด กรุณาตรวจสอบกับสายการบินโดยตรง" },
+  "Batik Air Malaysia":   { single: 35, twin: 32 },
+  "HK Express":           { single: 36, twin: 32 },
+  "Juneyao Airlines":     { single: 36, twin: 32 }
 };
 
 // populate airline dropdown
@@ -577,9 +504,11 @@ Object.keys(AIRLINES).forEach(name=>{
   const opt = document.createElement('option');
   opt.value = name;
   opt.textContent = name;
-  if(name === "Air Asia") opt.selected = true;
+  if(name === "Thai AirAsia") opt.selected = true;
   airlineSelect.appendChild(opt);
 });
+
+const pregTypeSelect = document.getElementById('pregType');
 
 // today pill
 const today = new Date();
@@ -642,30 +571,32 @@ function calcGATodayDays(){
   }
 }
 
-function evaluateAirline(name, ageDays){
+function getMaxDays(rule, pregType){
+  const maxWeeks = pregType === 'twin' ? rule.twin : rule.single;
+  return toDays(maxWeeks, 0);
+}
+
+function evaluateAirline(name, ageDays, pregType){
   const rule = AIRLINES[name];
-  if(!rule || (rule.allowedMax === null && rule.medMax === null && rule.notAllowedFrom === null)){
-    return { status: 'unknown', note: rule && rule.note ? rule.note : "ไม่มีข้อมูลในระบบ กรุณาติดต่อสายการบินโดยตรง" };
+  if(!rule){
+    return { status: 'unknown', note: "ไม่มีข้อมูลในระบบ กรุณาติดต่อสายการบินโดยตรง" };
   }
-  if(name === "Batik Air"){
-    return { status: 'medcert', note: rule.note };
-  }
-  if(ageDays <= rule.allowedMax){
-    return { status: 'allowed', note: rule.note || null };
-  } else if(rule.medMax !== null && ageDays <= rule.medMax){
-    return { status: 'medcert', note: rule.note || null };
+  const maxDays = getMaxDays(rule, pregType);
+  const extraNote = pregType === 'twin' ? (rule.twinNote || rule.note || null) : (rule.note || null);
+
+  if(ageDays <= maxDays){
+    return { status: 'allowed', note: extraNote, maxDays };
   } else {
-    return { status: 'notallowed', note: rule.note || null };
+    return { status: 'notallowed', note: extraNote, maxDays };
   }
 }
 
-function findAlternatives(currentAirline, ageDays){
+function findAlternatives(currentAirline, ageDays, pregType){
   const alts = [];
   Object.keys(AIRLINES).forEach(name=>{
     if(name === currentAirline) return;
     const rule = AIRLINES[name];
-    const cap = rule.medMax !== null ? rule.medMax : rule.allowedMax;
-    if(cap === null || cap === undefined) return;
+    const cap = getMaxDays(rule, pregType);
     if(ageDays <= cap){
       alts.push({ name, cap });
     }
@@ -694,20 +625,20 @@ document.getElementById('calcBtn').addEventListener('click', ()=>{
   document.getElementById('gaTodayValue').textContent = `${w} Weeks ${d} Days`;
 
   const airlineName = airlineSelect.value;
-  document.getElementById('resultAirline').textContent = airlineName;
+  const pregType = pregTypeSelect.value;
+  const pregLabel = pregType === 'twin' ? 'ครรภ์แฝด' : 'ครรภ์เดี่ยว';
+  document.getElementById('resultAirline').textContent = `${airlineName} · ${pregLabel}`;
 
-  const evalResult = evaluateAirline(airlineName, ageDays);
+  const evalResult = evaluateAirline(airlineName, ageDays, pregType);
   const badge = document.getElementById('statusBadge');
   const note = document.getElementById('detailNote');
   const maxGaBox = document.getElementById('maxGaBox');
   const maxGaValue = document.getElementById('maxGaValue');
   badge.className = 'status-badge';
 
-  const rule = AIRLINES[airlineName];
-  const maxCapDays = rule ? (rule.medMax !== null && rule.medMax !== undefined ? rule.medMax : rule.allowedMax) : null;
-  if(maxCapDays !== null && maxCapDays !== undefined && maxCapDays > 0){
-    const { w: mw, d: md } = daysToWD(maxCapDays);
-    maxGaValue.textContent = `${mw} สัปดาห์ ${md} วัน`;
+  if(evalResult.maxDays !== null && evalResult.maxDays !== undefined){
+    const { w: mw, d: md } = daysToWD(evalResult.maxDays);
+    maxGaValue.textContent = `${mw} สัปดาห์ (${pregLabel})`;
     maxGaBox.style.display = 'flex';
   } else {
     maxGaBox.style.display = 'none';
@@ -716,15 +647,11 @@ document.getElementById('calcBtn').addEventListener('click', ()=>{
   if(evalResult.status === 'allowed'){
     badge.classList.add('allowed');
     badge.textContent = '✅ Fit to fly';
-    note.textContent = evalResult.note || 'เดินทางได้ตามปกติ ไม่ต้องใช้ใบรับรองแพทย์';
-  } else if(evalResult.status === 'medcert'){
-    badge.classList.add('medcert');
-    badge.textContent = '⚠️ Fit to fly (ต้องมีใบรับรองแพทย์)';
-    note.textContent = evalResult.note || 'กรุณาเตรียมใบรับรองแพทย์ (Medical Certificate) ก่อนเดินทาง';
+    note.textContent = evalResult.note || 'เดินทางได้ตามปกติ กรุณาเตรียมใบรับรองแพทย์ (Fit-to-Fly) หากอายุครรภ์เกิน 28 สัปดาห์ ตามเงื่อนไขทั่วไปของสายการบิน';
   } else if(evalResult.status === 'notallowed'){
     badge.classList.add('notallowed');
     badge.textContent = '❌ Not fit to fly';
-    note.textContent = evalResult.note || 'สายการบินนี้ปฏิเสธรับผู้โดยสารที่อายุครรภ์นี้';
+    note.textContent = evalResult.note || 'สายการบินนี้ปฏิเสธรับผู้โดยสารที่อายุครรภ์นี้ (เกินอายุครรภ์สูงสุดที่รับ)';
   } else {
     badge.classList.add('medcert');
     badge.textContent = 'ℹ️ ไม่มีข้อมูลอายุครรภ์ที่แน่นอน';
@@ -737,14 +664,14 @@ document.getElementById('calcBtn').addEventListener('click', ()=>{
   recList.innerHTML = '';
 
   if(evalResult.status === 'notallowed'){
-    const alts = findAlternatives(airlineName, ageDays);
+    const alts = findAlternatives(airlineName, ageDays, pregType);
     if(alts.length > 0){
       recBox.style.display = 'block';
       alts.forEach(a=>{
-        const { w: aw, d: ad } = daysToWD(a.cap);
+        const { w: aw } = daysToWD(a.cap);
         const row = document.createElement('div');
         row.className = 'recommend-item';
-        row.innerHTML = `<span class="name">${a.name}</span><span class="limit">แนะนำ — รับถึง ${aw} สัปดาห์ ${ad} วัน</span>`;
+        row.innerHTML = `<span class="name">${a.name}</span><span class="limit">แนะนำ — รับถึง ${aw} สัปดาห์</span>`;
         recList.appendChild(row);
       });
     } else {
