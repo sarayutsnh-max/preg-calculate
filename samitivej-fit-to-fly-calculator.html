@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samitivej Airport Clinic — Fit to Fly Calculator</title>
+<style>
+  :root{
+    --cream:#fbf3df;
+    --cream-deep:#f5e8c8;
+    --green:#1c5c3d;
+    --green-deep:#123f2a;
+    --gold:#c79a3e;
+    --gold-soft:#e6c876;
+    --ink:#2b2118;
+    --allowed:#2f8f5b;
+    --medcert:#c8862a;
+    --notallowed:#c14b4b;
+    --card-shadow: 0 12px 30px rgba(28,92,61,0.14);
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(199,154,62,0.18), transparent 40%),
+      radial-gradient(circle at 90% 85%, rgba(28,92,61,0.12), transparent 45%),
+      var(--cream);
+    color: var(--ink);
+    min-height:100vh;
+    padding: 28px 16px 60px;
+  }
+
+  .wrap{
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  /* ---------- header ---------- */
+  .header{
+    text-align:center;
+    margin-bottom: 26px;
+    position:relative;
+  }
+
+  .sky{
+    position:relative;
+    height:56px;
+    margin-bottom: 6px;
+  }
+
+  .plane{
+    position:absolute;
+    font-size: 22px;
+    animation: fly 9s linear infinite;
+    top: 10px;
+  }
+  @keyframes fly{
+    0%{ left:-8%; transform: rotate(0deg);}
+    100%{ left:108%; transform: rotate(0deg);}
+  }
+
+  .clinic-name{
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+  .clinic-name .accent{ color: var(--gold); }
+
+  .subtitle{
+    font-size: 0.98rem;
+    color: #6b5a3d;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .today-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-top: 14px;
+    background: var(--green);
+    color: var(--cream);
+    padding: 7px 18px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight:600;
+    box-shadow: var(--card-shadow);
+  }
+
+  /* ---------- card ---------- */
+  .card{
+    background: #fffdf7;
+    border-radius: 26px;
+    padding: 28px 26px 30px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(199,154,62,0.25);
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:-40px; right:-40px;
+    width:140px; height:140px;
+    background: radial-gradient(circle, rgba(199,154,62,0.16), transparent 70%);
+    border-radius:50%;
+  }
+
+  .card h2{
+    margin: 0 0 18px;
+    font-size: 1.05rem;
+    color: var(--green-deep);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card h2 .num{
+    background: var(--gold-soft);
+    color: var(--green-deep);
+    font-weight:700;
+    width:26px;height:26px;
+    border-radius:50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.85rem;
+  }
+
+  .field{
+    margin-bottom: 16px;
+  }
+  .field label{
+    display:block;
+    font-size: 0.86rem;
+    font-weight:600;
+    color: #5a4a30;
+    margin-bottom: 6px;
+  }
+
+  select, input[type="date"]{
+    width:100%;
+    padding: 11px 14px;
+    border-radius: 14px;
+    border: 1.5px solid #e3d6ae;
+    background: #fffef9;
+    font-size: 0.95rem;
+    color: var(--ink);
+    font-family: inherit;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  select:focus, input[type="date"]:focus{
+    outline:none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(28,92,61,0.12);
+  }
+
+  .row2{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .ga-row{
+    display:grid;
+    grid-template-columns: 1fr 90px 1fr 90px;
+    gap: 10px;
+    align-items:end;
+  }
+  .ga-row label.unit{
+    font-size: 0.8rem;
+    color:#8a7a56;
+    font-weight:600;
+    text-align:center;
+    padding-bottom: 11px;
+  }
+
+  .hint{
+    font-size: 0.78rem;
+    color: #9c8a60;
+    margin-top: -8px;
+    margin-bottom: 14px;
+  }
+
+  #gaExamBlock{
+    transition: max-height .25s ease, opacity .2s ease;
+    overflow:hidden;
+  }
+  #gaExamBlock.hidden{
+    max-height:0 !important;
+    opacity:0;
+    margin:0;
+    padding:0;
+  }
+
+  .calc-btn{
+    width:100%;
+    padding: 15px;
+    border:none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-deep) 100%);
+    color: var(--cream);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor:pointer;
+    box-shadow: 0 8px 20px rgba(18,63,42,0.3);
+    transition: transform .12s ease, box-shadow .12s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+  }
+  .calc-btn:hover{ transform: translateY(-2px); box-shadow: 0 10px 24px rgba(18,63,42,0.38); }
+  .calc-btn:active{ transform: translateY(0px); }
+
+  /* ---------- result ---------- */
+  #resultCard{
+    display:none;
+  }
+  #resultCard.show{
+    display:block;
+    animation: pop .35s ease;
+  }
+  @keyframes pop{
+    from{ opacity:0; transform: translateY(10px) scale(0.98);}
+    to{ opacity:1; transform: translateY(0) scale(1);}
+  }
+
+  .ga-today{
+    text-align:center;
+    padding: 6px 0 18px;
+  }
+  .ga-today .label{
+    font-size:0.85rem;
+    color:#6b5a3d;
+    font-weight:600;
+    margin-bottom:4px;
+  }
+  .ga-today .value{
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: var(--green-deep);
+  }
+  .ga-today .value .baby{ font-size:1.6rem; margin-right:6px; }
+
+  .divider{
+    border:none;
+    border-top: 1.5px dashed #e3d6ae;
+    margin: 6px 0 18px;
+  }
+
+  .airline-line{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background: var(--cream-deep);
+    border-radius:14px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-weight:700;
+    color: var(--green-deep);
+  }
+  .airline-line span.plane-ico{ margin-right:6px; }
+
+  .status-badge{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color:#fff;
+    margin-bottom: 12px;
+    text-align:center;
+  }
+  .status-badge.allowed{ background: linear-gradient(135deg,#3aa16b,#2f8f5b); }
+  .status-badge.medcert{ background: linear-gradient(135deg,#e0a94a,#c8862a); }
+  .status-badge.notallowed{ background: linear-gradient(135deg,#d96a6a,#c14b4b); }
+
+  .detail-note{
+    text-align:center;
+    font-size:0.88rem;
+    color:#6b5a3d;
+    margin-bottom: 6px;
+  }
+
+  .recommend-box{
+    margin-top: 16px;
+    background: #fff7e6;
+    border: 1.5px solid var(--gold-soft);
+    border-radius: 16px;
+    padding: 16px 18px;
+  }
+  .recommend-box .title{
+    font-weight:700;
+    color: var(--green-deep);
+    font-size:0.92rem;
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .recommend-item{
+    display:flex;
+    justify-content:space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed #ecd9a0;
+    font-size: 0.9rem;
+  }
+  .recommend-item:last-child{ border-bottom:none; }
+  .recommend-item .name{ font-weight:700; color: var(--green-deep); }
+  .recommend-item .limit{ color:#8a6a1f; font-weight:600; }
+
+  .footer-note{
+    text-align:center;
+    font-size: 0.76rem;
+    color:#9c8a60;
+    margin-top: 24px;
+    line-height:1.6;
+  }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="sky">
+      <div class="plane" style="animation-delay:0s;">✈️</div>
+      <div class="plane" style="animation-delay:-4.5s;">🛫</div>
+    </div>
+    <h1 class="clinic-name">🤰 Samitivej <span class="accent">Airport</span> Clinic</h1>
+    <div class="subtitle">Pregnancy Age & Fit-to-Fly Calculator</div>
+    <div class="today-pill">📅 <span id="todayPill"></span></div>
+  </div>
+
+  <!-- Column 1: pregnancy details -->
+  <div class="card">
+    <h2><span class="num">1</span> ข้อมูลอายุครรภ์</h2>
+
+    <div class="field">
+      <label for="refBy">Reference by</label>
+      <select id="refBy">
+        <option value="lmp">Last Menstrual Period – LMP</option>
+        <option value="us" selected>Ultrasound / Maternity record book</option>
+        <option value="edc">Expected Date of Confinement (EDC)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label id="dateLabel" for="examDate">Date of Last Examination</label>
+      <input type="date" id="examDate">
+    </div>
+
+    <div id="gaExamBlock" class="field">
+      <label>GA at Last Examination (only for Ultrasound / Baby book)</label>
+      <div class="ga-row">
+        <input type="number" id="gaWeek" min="0" max="45" placeholder="Week" value="32">
+        <label class="unit">Week</label>
+        <input type="number" id="gaDay" min="0" max="6" placeholder="Day" value="4">
+        <label class="unit">Day</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Column 2: airline -->
+  <div class="card">
+    <h2><span class="num">2</span> เลือกสายการบิน</h2>
+    <div class="field" style="margin-bottom:0;">
+      <label for="airline">Airlines</label>
+      <select id="airline"></select>
+    </div>
+  </div>
+
+  <!-- Column 3: calculate -->
+  <div class="card">
+    <h2><span class="num">3</span> คำนวณ</h2>
+    <button class="calc-btn" id="calcBtn">🧮 Calculate Fit to Fly</button>
+  </div>
+
+  <!-- Result -->
+  <div class="card" id="resultCard">
+    <div class="ga-today">
+      <div class="label">GA today</div>
+      <div class="value"><span class="baby">👶</span><span id="gaTodayValue">-</span></div>
+    </div>
+    <hr class="divider">
+    <div class="airline-line">
+      <span><span class="plane-ico">✈️</span><span id="resultAirline">-</span></span>
+    </div>
+    <div id="statusBadge" class="status-badge">-</div>
+    <div class="detail-note" id="detailNote"></div>
+    <div id="recommendBox" class="recommend-box" style="display:none;">
+      <div class="title">💡 คำแนะนำสายการบินอื่น</div>
+      <div id="recommendList"></div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Samitivej Airport Clinic · เครื่องมือนี้ใช้เพื่อประเมินเบื้องต้นเท่านั้น กรุณายืนยันเงื่อนไขล่าสุดกับสายการบินก่อนเดินทางทุกครั้ง
+  </div>
+
+</div>
+
+<script>
+/* -------------------- Airline rule data --------------------
+   Extracted from clinic's "กำหนดอายุครรภ์แต่ละสายการบิน" reference sheet.
+   Each rule threshold given as {w, d} -> converted to total days = w*7+d
+-------------------------------------------------------------- */
+function toDays(w,d){ return w*7+d; }
+
+const AIRLINES = {
+  "Thai Smile": {
+    allowedMax: toDays(28,0),
+    medMax: toDays(36,0),
+    notAllowedFrom: toDays(36,1)
+  },
+  "Thai Lion Air": {
+    allowedMax: toDays(28,6),
+    medMax: toDays(35,0),
+    notAllowedFrom: toDays(35,1)
+  },
+  "Nok Air": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(36,0),
+    notAllowedFrom: toDays(36,1)
+  },
+  "Air Asia": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(34,6),
+    notAllowedFrom: toDays(35,0)
+  },
+  "Batik Air": {
+    allowedMax: 0,
+    medMax: null, // no defined upper cap in source data - always needs medical certificate from day 1
+    notAllowedFrom: null,
+    note: "ต้องใช้ใบรับรองแพทย์ตั้งแต่ทราบว่าตั้งครรภ์ (ไม่มีข้อมูลอายุครรภ์สูงสุดที่ปฏิเสธ กรุณาตรวจสอบกับสายการบินโดยตรง)"
+  },
+  "Thai Airways": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(36,0),
+    notAllowedFrom: toDays(36,1)
+  },
+  "Bangkok Airways": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(36,0),
+    notAllowedFrom: toDays(36,1)
+  },
+  "Emirates": {
+    allowedMax: toDays(28,6),
+    medMax: toDays(36,6),
+    notAllowedFrom: toDays(37,0)
+  },
+  "Qatar Airways": {
+    allowedMax: toDays(28,6),
+    medMax: toDays(36,6),
+    notAllowedFrom: toDays(37,0)
+  },
+  "Etihad": {
+    allowedMax: toDays(28,6),
+    medMax: toDays(36,6),
+    notAllowedFrom: toDays(37,0)
+  },
+  "Malaysia Airlines": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(35,6),
+    notAllowedFrom: toDays(36,0)
+  },
+  "Lufthansa": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(35,6),
+    notAllowedFrom: toDays(36,0)
+  },
+  "Gulf Air": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(35,6),
+    notAllowedFrom: toDays(36,0)
+  },
+  "Kuwait Airways": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(35,6),
+    notAllowedFrom: toDays(36,0)
+  },
+  "SWISS": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(35,6),
+    notAllowedFrom: toDays(36,0)
+  },
+  "Austrian Airlines": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(35,6),
+    notAllowedFrom: toDays(36,0)
+  },
+  "Air Canada": {
+    allowedMax: toDays(35,6),
+    medMax: toDays(35,6),
+    notAllowedFrom: toDays(36,0),
+    note: "ส่วนใหญ่ไม่ต้องใช้ใบรับรองแพทย์ (Most cases do not require a medical certificate)"
+  },
+  "JAL": {
+    allowedMax: null,
+    medMax: null,
+    notAllowedFrom: null,
+    note: "ไม่มีข้อมูลอายุครรภ์ที่แน่นอนในระบบ กรุณาติดต่อสายการบินโดยตรง"
+  },
+  "Korean Air": {
+    allowedMax: toDays(31,6),
+    medMax: toDays(36,6),
+    notAllowedFrom: toDays(37,0)
+  },
+  "Thai VietJet": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(35,6),
+    notAllowedFrom: toDays(36,0)
+  },
+  "Thai AirAsia": {
+    allowedMax: toDays(27,6),
+    medMax: toDays(34,6),
+    notAllowedFrom: toDays(35,0)
+  }
+};
+
+// populate airline dropdown
+const airlineSelect = document.getElementById('airline');
+Object.keys(AIRLINES).forEach(name=>{
+  const opt = document.createElement('option');
+  opt.value = name;
+  opt.textContent = name;
+  if(name === "Air Asia") opt.selected = true;
+  airlineSelect.appendChild(opt);
+});
+
+// today pill
+const today = new Date();
+today.setHours(0,0,0,0);
+document.getElementById('todayPill').textContent = "Today: " + fmtDate(today);
+
+function fmtDate(d){
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+// default exam date = today
+document.getElementById('examDate').valueAsDate = today;
+
+// reference-by field toggling
+const refBy = document.getElementById('refBy');
+const dateLabel = document.getElementById('dateLabel');
+const gaExamBlock = document.getElementById('gaExamBlock');
+
+function updateRefUI(){
+  const v = refBy.value;
+  if(v === 'us'){
+    dateLabel.textContent = "Date of Last Examination";
+    gaExamBlock.classList.remove('hidden');
+  } else if(v === 'lmp'){
+    dateLabel.textContent = "Date of Last Menstrual Period (LMP)";
+    gaExamBlock.classList.add('hidden');
+  } else {
+    dateLabel.textContent = "Expected Date of Confinement (EDC)";
+    gaExamBlock.classList.add('hidden');
+  }
+}
+refBy.addEventListener('change', updateRefUI);
+updateRefUI();
+
+function daysBetween(d1, d2){
+  // whole days between two dates (d2 - d1), truncated
+  const ms = d2.getTime() - d1.getTime();
+  return Math.round(ms / 86400000);
+}
+
+function calcGATodayDays(){
+  const refVal = refBy.value;
+  const examStr = document.getElementById('examDate').value;
+  if(!examStr) return null;
+  const examDate = new Date(examStr + "T00:00:00");
+
+  if(refVal === 'us'){
+    const gaW = parseFloat(document.getElementById('gaWeek').value) || 0;
+    const gaD = parseFloat(document.getElementById('gaDay').value) || 0;
+    const diff = daysBetween(examDate, today);
+    return diff + gaW*7 + gaD;
+  } else if(refVal === 'lmp'){
+    return daysBetween(examDate, today);
+  } else { // edc
+    const diffToEdc = daysBetween(today, examDate); // edc - today
+    return 280 - diffToEdc;
+  }
+}
+
+function evaluateAirline(name, ageDays){
+  const rule = AIRLINES[name];
+  if(!rule || (rule.allowedMax === null && rule.medMax === null && rule.notAllowedFrom === null)){
+    return { status: 'unknown', note: rule && rule.note ? rule.note : "ไม่มีข้อมูลในระบบ กรุณาติดต่อสายการบินโดยตรง" };
+  }
+  if(name === "Batik Air"){
+    return { status: 'medcert', note: rule.note };
+  }
+  if(ageDays <= rule.allowedMax){
+    return { status: 'allowed', note: rule.note || null };
+  } else if(rule.medMax !== null && ageDays <= rule.medMax){
+    return { status: 'medcert', note: rule.note || null };
+  } else {
+    return { status: 'notallowed', note: rule.note || null };
+  }
+}
+
+function findAlternatives(currentAirline, ageDays){
+  const alts = [];
+  Object.keys(AIRLINES).forEach(name=>{
+    if(name === currentAirline) return;
+    const rule = AIRLINES[name];
+    const cap = rule.medMax !== null ? rule.medMax : rule.allowedMax;
+    if(cap === null || cap === undefined) return;
+    if(ageDays <= cap){
+      alts.push({ name, cap });
+    }
+  });
+  // sort by highest acceptance first
+  alts.sort((a,b)=> b.cap - a.cap);
+  return alts.slice(0,3);
+}
+
+function daysToWD(days){
+  const w = Math.floor(days/7);
+  const d = days % 7;
+  return { w, d };
+}
+
+document.getElementById('calcBtn').addEventListener('click', ()=>{
+  const ageDays = calcGATodayDays();
+  const resultCard = document.getElementById('resultCard');
+
+  if(ageDays === null || isNaN(ageDays)){
+    alert("กรุณาระบุวันที่ให้ครบถ้วน");
+    return;
+  }
+
+  const { w, d } = daysToWD(Math.max(ageDays,0));
+  document.getElementById('gaTodayValue').textContent = `${w} Weeks ${d} Days`;
+
+  const airlineName = airlineSelect.value;
+  document.getElementById('resultAirline').textContent = airlineName;
+
+  const evalResult = evaluateAirline(airlineName, ageDays);
+  const badge = document.getElementById('statusBadge');
+  const note = document.getElementById('detailNote');
+  badge.className = 'status-badge';
+
+  if(evalResult.status === 'allowed'){
+    badge.classList.add('allowed');
+    badge.textContent = '✅ Fit to fly';
+    note.textContent = evalResult.note || 'เดินทางได้ตามปกติ ไม่ต้องใช้ใบรับรองแพทย์';
+  } else if(evalResult.status === 'medcert'){
+    badge.classList.add('medcert');
+    badge.textContent = '⚠️ Fit to fly (ต้องมีใบรับรองแพทย์)';
+    note.textContent = evalResult.note || 'กรุณาเตรียมใบรับรองแพทย์ (Medical Certificate) ก่อนเดินทาง';
+  } else if(evalResult.status === 'notallowed'){
+    badge.classList.add('notallowed');
+    badge.textContent = '❌ Not fit to fly';
+    note.textContent = evalResult.note || 'สายการบินนี้ปฏิเสธรับผู้โดยสารที่อายุครรภ์นี้';
+  } else {
+    badge.classList.add('medcert');
+    badge.textContent = 'ℹ️ ไม่มีข้อมูลอายุครรภ์ที่แน่นอน';
+    note.textContent = evalResult.note || '';
+  }
+
+  // recommendations only if not allowed (i.e. patient cannot fly with chosen airline)
+  const recBox = document.getElementById('recommendBox');
+  const recList = document.getElementById('recommendList');
+  recList.innerHTML = '';
+
+  if(evalResult.status === 'notallowed'){
+    const alts = findAlternatives(airlineName, ageDays);
+    if(alts.length > 0){
+      recBox.style.display = 'block';
+      alts.forEach(a=>{
+        const { w: aw, d: ad } = daysToWD(a.cap);
+        const row = document.createElement('div');
+        row.className = 'recommend-item';
+        row.innerHTML = `<span class="name">${a.name}</span><span class="limit">แนะนำ — รับถึง ${aw} สัปดาห์ ${ad} วัน</span>`;
+        recList.appendChild(row);
+      });
+    } else {
+      recBox.style.display = 'block';
+      recList.innerHTML = `<div class="recommend-item"><span>ไม่พบสายการบินอื่นที่รับอายุครรภ์นี้ในระบบ กรุณาปรึกษาแพทย์และติดต่อสายการบินโดยตรง</span></div>`;
+    }
+  } else {
+    recBox.style.display = 'none';
+  }
+
+  resultCard.classList.add('show');
+  resultCard.scrollIntoView({behavior:'smooth', block:'nearest'});
+});
+</script>
+</body>
+</html>
